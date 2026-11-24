@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diario del servizio civile</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eaeef4;--card:#fff;--ink:#14213d;--mut:#5d6a80;--line:#d7dde8;--field:#f4f6fa;--ok:#12936a;--bad:#c4302b;
+--c-perm:#2563eb;--c-mp:#12936a;--c-mn:#b4437a;--c-str:#c48a00;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1420;--card:#171f2f;--ink:#e8edf6;--mut:#93a0b8;--line:#2a3550;--field:#0e1420;--ok:#3fc79a;--bad:#ff7b72;
+--c-perm:#6b9bff;--c-mp:#3fc79a;--c-mn:#e57bb0;--c-str:#e8b73a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1420;--card:#171f2f;--ink:#e8edf6;--mut:#93a0b8;--line:#2a3550;--field:#0e1420;--ok:#3fc79a;--bad:#ff7b72;--c-perm:#6b9bff;--c-mp:#3fc79a;--c-mn:#e57bb0;--c-str:#e8b73a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font:700 1.6rem/1.15 Georgia,"Times New Roman",serif;margin:8px 0 4px}
+.sub{color:var(--mut);margin:0 0 20px;font-size:.95rem}
+h2{font-size:1rem;margin:28px 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.name{font-weight:600}
+.left{font:700 2rem/1 Georgia,serif;font-variant-numeric:tabular-nums}
+.left small{font:500 .85rem system-ui,sans-serif;color:var(--mut);margin-left:4px}
+.meta{color:var(--mut);font-size:.85rem;margin-top:6px}
+.meta.over{color:var(--bad);font-weight:600}
+.ticks{display:flex;gap:2px;margin-top:10px}
+.t{flex:1;height:14px;border-radius:2px;background:var(--line)}
+label{display:block;font-size:.85rem;color:var(--mut);margin:12px 0 4px}
+input,select,textarea,button{font:inherit;color:var(--ink)}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--field)}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--c-perm);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer}
+.chip span{display:block;padding:10px 12px;border:2px solid var(--line);border-radius:10px;font-size:.9rem;text-align:center;background:var(--field)}
+.chip input:checked+span{border-color:var(--k);font-weight:600}
+.chip input:focus-visible+span{outline:3px solid var(--c-perm);outline-offset:2px}
+.btn{width:100%;margin-top:16px;padding:12px;border:0;border-radius:10px;background:var(--ink);color:var(--bg);font-weight:600;cursor:pointer}
+.btn.alt{background:var(--field);color:var(--ink);border:1px solid var(--line);margin-top:8px}
+.btn.danger{background:var(--bad);color:#fff}
+.log{list-style:none;margin:0;padding:0}
+.log li{display:grid;grid-template-columns:10px 1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.log li:first-child{border-top:0}
+.dot{width:10px;height:10px;border-radius:50%}
+.log b{font-variant-numeric:tabular-nums}
+.log .n{color:var(--mut);font-size:.85rem}
+.x{border:0;background:none;color:var(--mut);font-size:1.3rem;line-height:1;padding:6px 10px;cursor:pointer;border-radius:8px}
+.x:hover{color:var(--bad)}
+.empty{color:var(--mut);padding:8px 0}
+details summary{cursor:pointer;font-weight:600}
+.set{display:grid;grid-template-columns:1fr 80px 90px;gap:8px;align-items:center;margin-top:10px}
+.set span{font-size:.9rem}
+textarea{min-height:90px;font:.8rem ui-monospace,Menlo,monospace}
+.msg{font-size:.85rem;color:var(--mut);margin-top:6px;min-height:1.2em}
+</style>
+</head>
+<body>
+<main>
+<h1>Diario del servizio civile</h1>
+<p class="sub">Segna permessi, malattie e straordinari: vedi subito quanto ti resta.</p>
+
+<section id="cards" aria-label="Riepilogo"></section>
+
+<h2>Segna un’assenza</h2>
+<div class="card">
+  <div class="chips" id="chips" role="radiogroup" aria-label="Tipo"></div>
+  <div class="row">
+    <div><label for="date">Data</label><input type="date" id="date"></div>
+    <div><label for="qty">Quantità <span id="uni"></span></label><input type="number" id="qty" min="0.25" step="0.25" value="1" inputmode="decimal"></div>
+  </div>
+  <label for="note">Nota (facoltativa)</label>
+  <input type="text" id="note" maxlength="80" placeholder="Es. visita medica">
+  <button class="btn" id="add">Segna</button>
+  <div class="msg" id="msg" role="status"></div>
+</div>
+
+<h2>Storico</h2>
+<div class="card"><ul class="log" id="log"></ul></div>
+
+<h2>Impostazioni</h2>
+<div class="card">
+  <details>
+    <summary>Monte annuale e unità</summary>
+    <div id="settings"></div>
+  </details>
+</div>
+<div class="card">
+  <details>
+    <summary>Backup e ripristino</summary>
+    <p class="meta">I dati restano su questo dispositivo. Copia il backup per spostarli o conservarli.</p>
+    <textarea id="bk" aria-label="Backup" spellcheck="false"></textarea>
+    <button class="btn alt" id="exp">Crea e copia backup</button>
+    <button class="btn alt" id="imp">Ripristina dal testo</button>
+    <button class="btn alt" id="rst">Azzera tutto</button>
+    <div class="msg" id="bmsg" role="status"></div>
+  </details>
+</div>
+</main>
+<script>
+var KEY='sc_v1';
+var DEF=[
+ {id:'perm',name:'Permessi ordinari',total:20,unit:'giorni',k:'--c-perm'},
+ {id:'mp',name:'Malattia pagata',total:15,unit:'giorni',k:'--c-mp'},
+ {id:'mn',name:'Malattia non pagata',total:15,unit:'giorni',k:'--c-mn'},
+ {id:'str',name:'Straordinari',total:20,unit:'ore',k:'--c-str'}
+];
+var S=null,sel='perm',armed=false;
+function fresh(){return {cats:JSON.parse(JSON.stringify(DEF)),log:[]};}
+function load(){try{S=JSON.parse(localStorage.getItem(KEY));}catch(e){S=null;}
+ if(!S||!Array.isArray(S.cats)||!Array.isArray(S.log))S=fresh();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function $(i){return document.getElementById(i);}
+function fmt(n){return String(Math.round(n*100)/100).replace('.',',');}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function cat(id){return S.cats.filter(function(c){return c.id===id;})[0];}
+function used(id){return S.log.reduce(function(a,e){return e.cat===id?a+e.qty:a;},0);}
+function today(){var d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
+function dfmt(d){return new Date(d+'T00:00').toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'});}
+
+function render(){
+ var h='';
+ S.cats.forEach(function(c){
+  var u=used(c.id),r=c.total-u,over=r<0,tk='';
+  var n=Math.max(1,Math.round(c.total));
+  for(var i=0;i<n;i++){
+   var f=Math.max(0,Math.min(1,u-i)),bg='';
+   if(f>=1)bg='background:var('+c.k+')';
+   else if(f>0)bg='background:linear-gradient(90deg,var('+c.k+') '+(f*100)+'%,var(--line) '+(f*100)+'%)';
+   tk+='<div class="t" style="'+bg+'"></div>';
+  }
+  h+='<div class="card"><div class="top"><span class="name">'+esc(c.name)+'</span>'+
+   '<span class="left" style="color:var('+c.k+')">'+fmt(Math.max(r,0))+'<small>'+esc(c.unit)+' restanti</small></span></div>'+
+   '<div class="ticks" aria-hidden="true">'+tk+'</div>'+
+   '<div class="meta'+(over?' over':'')+'">'+(over?'Superato di '+fmt(-r)+' '+esc(c.unit)+' · ':'')+'Usati '+fmt(u)+' su '+fmt(c.total)+' '+esc(c.unit)+'</div></div>';
+ });
+ $('cards').innerHTML=h;
+
+ $('chips').innerHTML=S.cats.map(function(c){
+  return '<label class="chip" style="--k:var('+c.k+');margin:0"><input type="radio" name="cat" value="'+c.id+'"'+(c.id===sel?' checked':'')+'><span>'+esc(c.name)+'</span></label>';
+ }).join('');
+ Array.prototype.forEach.call(document.querySelectorAll('input[name=cat]'),function(el){
+  el.onchange=function(){sel=el.value;$('uni').textContent='('+cat(sel).unit+')';};
+ });
+ if(!cat(sel))sel=S.cats[0].id;
+ $('uni').textContent='('+cat(sel).unit+')';
+
+ var L=S.log.slice().sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:b.t-a.t;});
+ $('log').innerHTML=L.length?L.map(function(e){
+  var c=cat(e.cat)||{name:'?',unit:'',k:'--line'};
+  return '<li><span class="dot" style="background:var('+c.k+')"></span><div><div>'+esc(c.name)+'</div><div class="n">'+dfmt(e.date)+(e.note?' · '+esc(e.note):'')+'</div></div>'+
+   '<b>'+fmt(e.qty)+' '+esc(c.unit)+'</b><button class="x" data-t="'+e.t+'" aria-label="Elimina voce">×</button></li>';
+ }).join(''):'<li class="empty">Ancora nessuna voce. Segna la prima assenza qui sopra.</li>';
+ Array.prototype.forEach.call(document.querySelectorAll('.x'),function(b){
+  b.onclick=function(){var t=+b.getAttribute('data-t');S.log=S.log.filter(function(e){return e.t!==t;});save();render();};
+ });
+}
+
+function renderSettings(){
+ $('settings').innerHTML=S.cats.map(function(c,i){
+  return '<div class="set"><span>'+esc(c.name)+'</span>'+
+   '<input type="number" min="0" step="0.5" value="'+c.total+'" data-i="'+i+'" data-f="total" aria-label="Totale '+esc(c.name)+'">'+
+   '<select data-i="'+i+'" data-f="unit" aria-label="Unità '+esc(c.name)+'"><option'+(c.unit==='giorni'?' selected':'')+'>giorni</option><option'+(c.unit==='ore'?' selected':'')+'>ore</option></select></div>';
+ }).join('');
+ Array.prototype.forEach.call($('settings').querySelectorAll('[data-i]'),function(el){
+  el.onchange=function(){
+   var c=S.cats[+el.getAttribute('data-i')],f=el.getAttribute('data-f');
+   if(f==='total'){var v=parseFloat(el.value);c.total=isNaN(v)||v<0?c.total:v;}else c.unit=el.value;
+   save();render();
+  };
+ });
+}
+
+$('date').value=today();
+$('add').onclick=function(){
+ var q=parseFloat($('qty').value),d=$('date').value,m=$('msg');
+ if(!d){m.textContent='Scegli una data.';return;}
+ if(isNaN(q)||q<=0){m.textContent='Inserisci una quantità maggiore di zero.';return;}
+ S.log.push({t:Date.now(),cat:sel,date:d,qty:q,note:$('note').value.trim()});
+ save();$('note').value='';$('qty').value=1;
+ var c=cat(sel);m.textContent='Segnato: '+fmt(q)+' '+c.unit+' di '+c.name.toLowerCase()+'.';
+ render();
+};
+$('exp').onclick=function(){
+ var t=$('bk');t.value=JSON.stringify(S);t.select();
+ var ok=false;try{ok=document.execCommand('copy');}catch(e){}
+ try{navigator.clipboard.writeText(t.value);ok=true;}catch(e){}
+ $('bmsg').textContent=ok?'Backup copiato. Incollalo in un posto sicuro.':'Backup creato: copia il testo qui sopra.';
+};
+$('imp').onclick=function(){
+ try{var d=JSON.parse($('bk').value);
+  if(!d||!Array.isArray(d.cats)||!Array.isArray(d.log))throw 0;
+  S=d;save();render();renderSettings();$('bmsg').textContent='Dati ripristinati.';
+ }catch(e){$('bmsg').textContent='Testo non valido: incolla un backup creato da questa pagina.';}
+};
+$('rst').onclick=function(){
+ var b=$('rst');
+ if(!armed){armed=true;b.textContent='Tocca di nuovo per cancellare tutto';b.className='btn danger';
+  setTimeout(function(){armed=false;b.textContent='Azzera tutto';b.className='btn alt';},4000);return;}
+ armed=false;S=fresh();save();render();renderSettings();
+ b.textContent='Azzera tutto';b.className='btn alt';$('bmsg').textContent='Tutto azzerato.';
+};
+load();render();renderSettings();
+</script>
+</body>
+</html>
